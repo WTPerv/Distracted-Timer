@@ -19,7 +19,7 @@ whitelistFile := configDir "\Whitelist.txt"
 DirCreate(configDir)
 
 if (!FileExist(whitelistFile)) {
-    FileAppend("code.exe`nnotepad.exe`n", whitelistFile)
+    FileAppend("explorer.exe`nnotepad.exe`n", whitelistFile)
 }
 
 posX := IniRead(configFile, "Window", "posX", 20)
@@ -31,6 +31,8 @@ dragId := "Draggable"
 
 alphaPercent := IniRead(configFile, "Window", "alpha", 60)
 alphaPercent := Min(Max(alphaPercent, 0), 100)
+
+currentDay := A_YDay
 
 ; ########################### GUI ###########################
 
@@ -107,7 +109,7 @@ LoadWhitelist() {
 }
 
 CheckFocus() {
-    global distractionSeconds
+    global distractionSeconds, currentDay
 
     try process := StrLower(WinGetProcessName("A"))
     catch
@@ -119,6 +121,11 @@ CheckFocus() {
     }
     else {
         timerText.SetFont("cFFFFFF")
+    }
+
+    if (currentDay != A_YDay) {
+        distractionSeconds := 0 ;reset every 24 hours
+        currentDay := A_YDay
     }
 
     hours := Floor(distractionSeconds / (60 * 60))
