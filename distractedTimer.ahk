@@ -4,6 +4,10 @@
 ; ######################################## SETTINGS ###########################
 ; #############################################################################
 
+;@Ahk2Exe-SetVersion 1.0.0
+;@Ahk2Exe-SetProductName Distracted Timer
+;@Ahk2Exe-SetDescription Counts time spent outside whitelisted apps
+
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 
@@ -248,7 +252,6 @@ PercentToByte(percent) {
 IsAutoStart() {
     if FileExist(startupLink) {
         FileGetShortcut startupLink, &outTarget
-        TrayTip(outTarget " VS " exePath)
         return outTarget = exePath
     }
     else
