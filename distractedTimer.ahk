@@ -11,6 +11,10 @@ configDir := A_AppData "\DistractionTimer"
 configFile := configDir "\Config.ini"
 whitelistFile := configDir "\Whitelist.txt"
 
+startupLink := A_Startup "\DistractedTimer.lnk"
+exePath := A_ScriptFullPath
+autoStartId := "Start with Windows"
+
 ; #############################################################################
 ; ########################################### LOGIC ###########################
 ; #############################################################################
@@ -89,6 +93,10 @@ A_TrayMenu.Add()
 A_TrayMenu.Add("Reset timer", ResetTimer)
 A_TrayMenu.Add("Reset position", ResetPosition)
 A_TrayMenu.Add("Opacity", opacityMenu)
+A_TrayMenu.Add()
+A_TrayMenu.Add(autoStartId, ToggleStartup)
+if (IsAutoStart())
+    A_TrayMenu.Check(autoStartId)
 A_TrayMenu.Add()
 A_TrayMenu.Add("Exit", (*) => ExitApp())
 
@@ -173,6 +181,20 @@ ResetPosition(*) {
     overlay.Show("x" posX " y" posY)
 }
 
+ToggleStartup(*) {
+    autoStart := IsAutoStart()
+    if (autoStart)
+        FileDelete (startupLink)
+    else
+        FileCreateShortcut exePath, startupLink
+
+    autoStart := !autoStart
+    if (autoStart)
+        A_TrayMenu.Check(autoStartId)
+    else
+        A_TrayMenu.Uncheck(autoStartId)
+}
+
 ; ######################## DRAG ###########################
 
 OnClick(*) {
@@ -219,6 +241,18 @@ SetOpacity(ItemName, ItemPos, MyMenu, Param1 := '') {
 
 PercentToByte(percent) {
     return Ceil(255 * percent / 100.0)
+}
+
+; ######################## AUTO START ###########################
+
+IsAutoStart() {
+    if FileExist(startupLink) {
+        FileGetShortcut startupLink, &outTarget
+        TrayTip(outTarget " VS " exePath)
+        return outTarget = exePath
+    }
+    else
+        return false
 }
 
 ; ######################## EXTRA ###########################
