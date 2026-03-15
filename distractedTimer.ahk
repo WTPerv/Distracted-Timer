@@ -4,9 +4,9 @@
 ; ######################################## SETTINGS ###########################
 ; #############################################################################
 
-;@Ahk2Exe-SetVersion 1.0.0
+;@Ahk2Exe-SetVersion 1.1.0
 ;@Ahk2Exe-SetProductName Distracted Timer
-;@Ahk2Exe-SetDescription Counts time spent outside whitelisted apps
+;@Ahk2Exe-SetDescription Distracted Timer
 
 #Requires AutoHotkey v2.0
 #SingleInstance Force
@@ -40,7 +40,8 @@ dragId := "Draggable"
 alphaPercent := IniRead(configFile, "Window", "alpha", 60)
 alphaPercent := Min(Max(alphaPercent, 0), 100)
 
-currentDay := A_YDay
+currentDay := IniRead(configFile, "Save", "currentDay", A_YDay)
+distractionSeconds := IniRead(configFile, "Save", "distractionSeconds", 0) - 1
 
 ; ########################### GUI ###########################
 
@@ -70,11 +71,6 @@ if (!dragMode)
 OnMessage(0x404, AHK_NOTIFYICON) ; WM_USER + 4
 OnExit OnExiting
 
-; ########################### TIMER ###########################
-
-distractionSeconds := 0
-SetTimer(CheckFocus, 1000)
-
 ; ########################### TRAY ###########################
 
 opacityMenu := Menu()
@@ -103,6 +99,13 @@ if (IsAutoStart())
     A_TrayMenu.Check(autoStartId)
 A_TrayMenu.Add()
 A_TrayMenu.Add("Exit", (*) => ExitApp())
+
+; ########################### LOGIC ###########################
+
+CheckFocus()
+SetTimer(CheckFocus, 1000)
+
+SetTimer(Save, 5 * 60 * 1000) ;save every 5 min
 
 ; #############################################################################
 ; ####################################### FUNCTIONS ###########################
@@ -140,12 +143,24 @@ CheckFocus() {
         currentDay := A_YDay
     }
 
-    hours := Floor(distractionSeconds / (60 * 60))
-    minutes := Mod(Floor(distractionSeconds / 60), 60)
-    seconds := Mod(distractionSeconds, 60)
+    time := Max(distractionSeconds, 0)
+    hours := Floor(time / (60 * 60))
+    minutes := Mod(Floor(time / 60), 60)
+    seconds := Mod(time, 60)
 
     timerText.Value := Format("{:02}:{:02}:{:02}", hours, minutes, seconds)
     focusText.Value := "Focused:`n" process
+}
+
+Save() {
+    overlay.GetPos(&posX, &posY)
+    IniWrite(posX, configFile, "Window", "posX")
+    IniWrite(posY, configFile, "Window", "posY")
+    IniWrite(dragMode, configFile, "Window", "dragMode")
+    IniWrite(alphaPercent, configFile, "Window", "alpha")
+
+    IniWrite(currentDay, configFile, "Save", "currentDay")
+    IniWrite(distractionSeconds, configFile, "Save", "distractionSeconds")
 }
 
 ; ######################## SYSTEM TRAY ###########################
@@ -160,9 +175,10 @@ ReloadWhitelist(*) {
 }
 
 ResetTimer(*) {
-    global whitelist
+    global distractionSeconds
     distractionSeconds := 0
     CheckFocus()
+    Save()
 }
 
 ToggleDragMode(*) {
@@ -177,12 +193,16 @@ ToggleDragMode(*) {
         A_TrayMenu.Uncheck(dragId)
         WinSetExStyle("+0x20", overlay.Hwnd) ;click-through
     }
+
+    Save()
 }
 
 ResetPosition(*) {
     posX := 20
     posY := 20
     overlay.Show("x" posX " y" posY)
+
+    Save()
 }
 
 ToggleStartup(*) {
@@ -206,11 +226,7 @@ OnClick(*) {
 }
 
 OnExiting(*) {
-    overlay.GetPos(&posX, &posY)
-    IniWrite(posX, configFile, "Window", "posX")
-    IniWrite(posY, configFile, "Window", "posY")
-    IniWrite(dragMode, configFile, "Window", "dragMode")
-    IniWrite(alphaPercent, configFile, "Window", "alpha")
+    Save()
 }
 
 ; https://www.autohotkey.com/board/topic/32608-changing-the-system-cursor/
@@ -241,6 +257,8 @@ SetOpacity(ItemName, ItemPos, MyMenu, Param1 := '') {
         else
             opacityMenu.Uncheck(p "%")
     }
+
+    Save()
 }
 
 PercentToByte(percent) {
