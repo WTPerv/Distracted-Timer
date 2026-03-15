@@ -2,6 +2,8 @@
 This creates a small timer that floats above everything\
 It ticks up whenever windows is focused on any software that's not included in a whitelist set up by you 🫵
 
+<img src="https://files.catbox.moe/nwgy91.png">
+
 ## How to use/install
 ### Option A: Executable
 1) Download the latest [release](https://github.com/WTPerv/Distracted-Timer/releases)
@@ -9,7 +11,7 @@ It ticks up whenever windows is focused on any software that's not included in a
 3) Execute it
 
 ### Option B: AutoHotKey Script
-1) Install AutoHotKey
+1) Install [AutoHotKey](https://www.autohotkey.com/)
 2) Download the [script](https://github.com/WTPerv/Distracted-Timer/blob/main/distractedTimer.ahk)
 3) Place it somewhere you won't forget
 4) Run the .ahk file
@@ -24,3 +26,5 @@ Click on "Start with Windows" if you don't wanna execute it manually every time
 * Draggable overlay
 * Customizable opacity
 * Option to start with Windows
+
+<img src="https://files.catbox.moe/i8pugx.png">
