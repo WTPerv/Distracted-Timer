@@ -4,7 +4,7 @@
 ; ######################################## SETTINGS ###########################
 ; #############################################################################
 
-;@Ahk2Exe-SetVersion 1.1.0
+;@Ahk2Exe-SetVersion 1.1.1
 ;@Ahk2Exe-SetProductName Distracted Timer
 ;@Ahk2Exe-SetDescription Distracted Timer
 
@@ -45,7 +45,7 @@ distractionSeconds := IniRead(configFile, "Save", "distractionSeconds", 0) - 1
 
 ; ########################### GUI ###########################
 
-overlay := Gui("+AlwaysOnTop -Caption +ToolWindow")
+overlay := Gui("+AlwaysOnTop -Caption +ToolWindow +E0x02000000")
 overlay.BackColor := "000000"
 overlay.SetFont("s24 cFFFFFF", "Segoe UI")
 overlay.MarginY := 0
@@ -176,7 +176,7 @@ ReloadWhitelist(*) {
 
 ResetTimer(*) {
     global distractionSeconds
-    distractionSeconds := 0
+    distractionSeconds := -1
     CheckFocus()
     Save()
 }
@@ -200,7 +200,7 @@ ToggleDragMode(*) {
 ResetPosition(*) {
     posX := 20
     posY := 20
-    overlay.Show("x" posX " y" posY)
+    overlay.Move(posX, posY)
 
     Save()
 }
