@@ -4,7 +4,7 @@
 ; ######################################## SETTINGS ###########################
 ; #############################################################################
 
-;@Ahk2Exe-SetVersion 1.1.1
+;@Ahk2Exe-SetVersion 1.2.0
 ;@Ahk2Exe-SetProductName Distracted Timer
 ;@Ahk2Exe-SetDescription Distracted Timer
 
@@ -42,20 +42,26 @@ alphaPercent := Min(Max(alphaPercent, 0), 100)
 
 currentDay := IniRead(configFile, "Save", "currentDay", A_YDay)
 distractionSeconds := IniRead(configFile, "Save", "distractionSeconds", 0) - 1
+focusedSeconds := IniRead(configFile, "Save", "focusedSeconds", 0) - 1
 
 ; ########################### GUI ###########################
 
 overlay := Gui("+AlwaysOnTop -Caption +ToolWindow +E0x02000000")
 overlay.BackColor := "000000"
-overlay.SetFont("s24 cFFFFFF", "Segoe UI")
+overlay.SetFont("c888888", "Segoe UI")
 overlay.MarginY := 0
 overlay.MarginX := 0
 overlayHeight := 100
 overlayWidth := 200
 
-timerText := overlay.AddText("Center w" overlayWidth, "00:00:00")
-focusText := overlay.AddText("Center w" overlayWidth, "Focused:`n-")
-focusText.SetFont("s10")
+timerDistractedText := overlay.AddText("Center h40 w" overlayWidth, "00:00:00")
+timerDistractedText.SetFont("s24")
+
+timerFocusedText := overlay.AddText("Center h20 w" overlayWidth, "00:00:00")
+timerFocusedText.SetFont("s12")
+
+processText := overlay.AddText("Center w" overlayWidth, "-")
+processText.SetFont("s10 cFFFFFF")
 
 dragHitbox := overlay.AddText("x0 y0 BackgroundTrans w" overlayWidth " h" overlayHeight)
 dragHitbox.OnEvent("Click", OnClick)
@@ -102,6 +108,7 @@ A_TrayMenu.Add("Exit", (*) => ExitApp())
 
 ; ########################### LOGIC ###########################
 
+isDistracted := -1 ; distracted = 1, focused = 0, dunno = -1
 CheckFocus()
 SetTimer(CheckFocus, 1000)
 
@@ -124,32 +131,58 @@ LoadWhitelist() {
 }
 
 CheckFocus() {
-    global distractionSeconds, currentDay
+    global distractionSeconds, focusedSeconds, isDistracted, currentDay
+    currDistracted := -1
 
-    try process := StrLower(WinGetProcessName("A"))
+    try
+        process := StrLower(WinGetProcessName("A"))
     catch
         process := "-"
 
     if (!whitelist.Has(process)) {
         distractionSeconds += 1
-        timerText.SetFont("cFF0000")
+        currDistracted := 1
     }
     else {
-        timerText.SetFont("cFFFFFF")
+        focusedSeconds += 1
+        currDistracted := 0
     }
 
     if (currentDay != A_YDay) {
         distractionSeconds := 0 ;reset every 24 hours
+        focusedSeconds := 0
         currentDay := A_YDay
     }
 
-    time := Max(distractionSeconds, 0)
+    if (currDistracted != isDistracted) {
+        if (currDistracted = 1) {
+            timerDistractedText.SetFont("cFF0000")
+            timerFocusedText.SetFont("c888888")
+        }
+        else {
+            timerDistractedText.SetFont("c888888")
+            timerFocusedText.SetFont("cFFFFFF")
+        }
+        isDistracted := currDistracted
+    }
+
+    tdValue := SecondsToTime(distractionSeconds)
+    tfValue := SecondsToTime(focusedSeconds)
+    if (timerDistractedText.Value != tdValue)
+        timerDistractedText.Value := tdValue
+    if (timerFocusedText.Value != tfValue)
+        timerFocusedText.Value := tfValue
+    if (processText.Value != process)
+        processText.Value := process
+}
+
+SecondsToTime(seconds) {
+    time := Max(seconds, 0)
     hours := Floor(time / (60 * 60))
     minutes := Mod(Floor(time / 60), 60)
     seconds := Mod(time, 60)
 
-    timerText.Value := Format("{:02}:{:02}:{:02}", hours, minutes, seconds)
-    focusText.Value := "Focused:`n" process
+    return Format("{:02}:{:02}:{:02}", hours, minutes, seconds)
 }
 
 Save() {
@@ -161,6 +194,7 @@ Save() {
 
     IniWrite(currentDay, configFile, "Save", "currentDay")
     IniWrite(distractionSeconds, configFile, "Save", "distractionSeconds")
+    IniWrite(focusedSeconds, configFile, "Save", "focusedSeconds")
 }
 
 ; ######################## SYSTEM TRAY ###########################
@@ -175,8 +209,9 @@ ReloadWhitelist(*) {
 }
 
 ResetTimer(*) {
-    global distractionSeconds
+    global distractionSeconds, focusedSeconds
     distractionSeconds := -1
+    focusedSeconds := -1
     CheckFocus()
     Save()
 }
