@@ -4,7 +4,7 @@
 ; ######################################## SETTINGS ###########################
 ; #############################################################################
 
-;@Ahk2Exe-SetVersion 1.2.0
+;@Ahk2Exe-SetVersion 1.3.0
 ;@Ahk2Exe-SetProductName Distracted Timer
 ;@Ahk2Exe-SetDescription Distracted Timer
 
@@ -39,6 +39,7 @@ dragId := "Draggable"
 
 alphaPercent := IniRead(configFile, "Window", "alpha", 60)
 alphaPercent := Min(Max(alphaPercent, 0), 100)
+scale := IniRead(configFile, "Window", "scale", 1)
 
 currentDay := IniRead(configFile, "Save", "currentDay", A_YDay)
 distractionSeconds := IniRead(configFile, "Save", "distractionSeconds", 0) - 1
@@ -51,24 +52,24 @@ overlay.BackColor := "000000"
 overlay.SetFont("c888888", "Segoe UI")
 overlay.MarginY := 0
 overlay.MarginX := 0
-overlayHeight := 100
-overlayWidth := 200
+overlayH := Ceil(90 * scale)
+overlayW := Ceil(200 * scale)
 
-timerDistractedText := overlay.AddText("Center h40 w" overlayWidth, "00:00:00")
-timerDistractedText.SetFont("s24")
+timerDistractedText := overlay.AddText(Format("Center w{:d} h{:d} x0 y0", overlayW, Floor(40 * scale)), "00:00:00")
+timerDistractedText.SetFont("s" Floor(24 * scale))
 
-timerFocusedText := overlay.AddText("Center h20 w" overlayWidth, "00:00:00")
-timerFocusedText.SetFont("s12")
+timerFocusedText := overlay.AddText(Format("Center w{:d} h{:d} x0 y{:d}", overlayW, Floor(20 * scale), Floor(40 * scale)), "00:00:00")
+timerFocusedText.SetFont("s" Floor(12 * scale))
 
-processText := overlay.AddText("Center w" overlayWidth, "-")
-processText.SetFont("s10 cFFFFFF")
+processText := overlay.AddText(Format("Center w{:d} h{:d} x0 y{:d}", overlayW, Floor(20 * scale), Floor(65 * scale)), "-")
+processText.SetFont("cFFFFFF s" Floor(10 * scale))
 
-dragHitbox := overlay.AddText("x0 y0 BackgroundTrans w" overlayWidth " h" overlayHeight)
+dragHitbox := overlay.AddText("x0 y0 BackgroundTrans w" overlayW " h" overlayH)
 dragHitbox.OnEvent("Click", OnClick)
 dragHitbox.hCursor := LoadCursor(IDC_HAND := 32646)
 OnMessage(0x20, WM_SETCURSOR)
 
-overlay.Show("NoActivate x" posX " y" posY " w" overlayWidth " h" overlayHeight)
+overlay.Show("NoActivate x" posX " y" posY " w" overlayW " h" overlayH)
 
 WinSetTransparent(PercentToByte(alphaPercent), overlay.Hwnd)
 if (!dragMode)
@@ -88,6 +89,15 @@ for p in percents {
         opacityMenu.Check(p "%")
 }
 
+scaleMenu := Menu()
+scales := [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4]
+for s in scales {
+    scaleMenu.Add("x" s, SetScale.Bind(, , , s), "Radio")
+
+    if (scale = s)
+        scaleMenu.Check("x" s)
+}
+
 A_TrayMenu.Delete()
 A_TrayMenu.Add(dragId, ToggleDragMode)
 if (dragMode)
@@ -99,11 +109,13 @@ A_TrayMenu.Add()
 A_TrayMenu.Add("Reset timer", ResetTimer)
 A_TrayMenu.Add("Reset position", ResetPosition)
 A_TrayMenu.Add("Opacity", opacityMenu)
+A_TrayMenu.Add("Scale", scaleMenu)
 A_TrayMenu.Add()
 A_TrayMenu.Add(autoStartId, ToggleStartup)
 if (IsAutoStart())
     A_TrayMenu.Check(autoStartId)
 A_TrayMenu.Add()
+A_TrayMenu.Add("Reload", (*) => Reload())
 A_TrayMenu.Add("Exit", (*) => ExitApp())
 
 ; ########################### LOGIC ###########################
@@ -191,6 +203,7 @@ Save() {
     IniWrite(posY, configFile, "Window", "posY")
     IniWrite(dragMode, configFile, "Window", "dragMode")
     IniWrite(alphaPercent, configFile, "Window", "alpha")
+    IniWrite(scale, configFile, "Window", "scale")
 
     IniWrite(currentDay, configFile, "Save", "currentDay")
     IniWrite(distractionSeconds, configFile, "Save", "distractionSeconds")
@@ -298,6 +311,15 @@ SetOpacity(ItemName, ItemPos, MyMenu, Param1 := '') {
 
 PercentToByte(percent) {
     return Ceil(255 * percent / 100.0)
+}
+
+SetScale(ItemName, ItemPos, MyMenu, Param1 := '') {
+    global scale
+    scale := Param1
+    ; ResetPosition()
+    Save()
+
+    Reload
 }
 
 ; ######################## AUTO START ###########################
