@@ -1,8 +1,10 @@
 # Distracted Timer
-This creates a small timer that floats above everything\
-It ticks up whenever windows is focused on any software that's not included in a whitelist set up by you 🫵
+This creates a small overlay that floats above everything\
+It containsa timer that ticks up whenever Windows is focused on any software that's not included in a whitelist set up by you 🫵\
+*(There's also a mini timer that does the opposite)*\
+*(For moral support)*
 
-<img src="https://files.catbox.moe/nwgy91.png">
+<img width="256" height="119" alt="Honeyview_wCfAXttEYT" src="https://github.com/user-attachments/assets/767ebb00-b181-4ce3-9954-259a23b233e9" />
 
 ## How to use/install
 ### Option A: Executable
@@ -21,10 +23,13 @@ Clicking the tray icon brings up a menu\
 Click on "Start with Windows" if you don't wanna execute it manually every time
 
 ## Features
-* Overlay timer
-* Shortcut to whitelist file
-* Draggable overlay
-* Customizable opacity
+* Floating overlay
+* Big timer counts when not focused on whitelisted software
+* Small timer does the opposite
+* Easy to configure whitelist
+* Overlay is invisible to clicks unless you enable draggable mode
+* Adjustable opacity
+* Adjustable scale
 * Option to start with Windows
 
-<img src="https://files.catbox.moe/i8pugx.png">
+<img width="278" height="314" alt="Honeyview_HbtOwlmBG4" src="https://github.com/user-attachments/assets/b35cb464-539e-4bd2-af33-29d6bed9e176" />
