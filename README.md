@@ -26,6 +26,7 @@ Click on "Start with Windows" if you don't wanna execute it manually every time
 * Floating overlay
 * Big timer counts when not focused on whitelisted software
 * Small timer does the opposite
+* Time is saved when you close it, but resets at midnight
 * Easy to configure whitelist
 * Overlay is invisible to clicks unless you enable draggable mode
 * Adjustable opacity
