@@ -4,7 +4,7 @@
 ; ######################################## SETTINGS ###########################
 ; #############################################################################
 
-;@Ahk2Exe-SetVersion 1.3.0
+;@Ahk2Exe-SetVersion 1.3.1
 ;@Ahk2Exe-SetProductName Distracted Timer
 ;@Ahk2Exe-SetDescription Distracted Timer
 
@@ -42,8 +42,8 @@ alphaPercent := Min(Max(alphaPercent, 0), 100)
 scale := IniRead(configFile, "Window", "scale", 1)
 
 currentDay := IniRead(configFile, "Save", "currentDay", A_YDay)
-distractionSeconds := IniRead(configFile, "Save", "distractionSeconds", 0) - 1
-focusedSeconds := IniRead(configFile, "Save", "focusedSeconds", 0) - 1
+distractionSeconds := IniRead(configFile, "Save", "distractionSeconds", 0)
+focusedSeconds := IniRead(configFile, "Save", "focusedSeconds", 0)
 
 ; ########################### GUI ###########################
 
@@ -121,7 +121,7 @@ A_TrayMenu.Add("Exit", (*) => ExitApp())
 ; ########################### LOGIC ###########################
 
 isDistracted := -1 ; distracted = 1, focused = 0, dunno = -1
-CheckFocus()
+CheckFocus(true)
 SetTimer(CheckFocus, 1000)
 
 SetTimer(Save, 5 * 60 * 1000) ;save every 5 min
@@ -142,7 +142,7 @@ LoadWhitelist() {
     return dict
 }
 
-CheckFocus() {
+CheckFocus(isFlash := false) {
     global distractionSeconds, focusedSeconds, isDistracted, currentDay
     currDistracted := -1
 
@@ -152,11 +152,13 @@ CheckFocus() {
         process := "-"
 
     if (!whitelist.Has(process)) {
-        distractionSeconds += 1
+        if (!isFlash)
+            distractionSeconds += 1
         currDistracted := 1
     }
     else {
-        focusedSeconds += 1
+        if (!isFlash)
+            focusedSeconds += 1
         currDistracted := 0
     }
 
@@ -223,9 +225,9 @@ ReloadWhitelist(*) {
 
 ResetTimer(*) {
     global distractionSeconds, focusedSeconds
-    distractionSeconds := -1
-    focusedSeconds := -1
-    CheckFocus()
+    distractionSeconds := 0
+    focusedSeconds := 0
+    CheckFocus(true)
     Save()
 }
 
