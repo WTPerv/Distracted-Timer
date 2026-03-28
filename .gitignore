@@ -1,0 +1,35 @@
+# -------------------------------
+# WINDOWS
+# -------------------------------
+
+.vscode/
+builds/
+
+# -------------------------------
+# LINUX
+# -------------------------------
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+venv/
+.venv/
+.env/
+.envrc/
+
+build/
+dist/
+*.spec
+AppImage/
+
+
+.DS_Store
+Thumbs.db
+
+*.log
+*.tmp
+
+*.swp
+*~
