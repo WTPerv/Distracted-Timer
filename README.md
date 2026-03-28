@@ -34,4 +34,4 @@ _(Linux users know what to do)_
 <img src="https://github.com/user-attachments/assets/4c5ad005-73e7-4556-9a25-a1a3d515224c" />
 
 ## Notes
-* I've only confirmed the linux build works on Linux Mint 22.3 - Cinnamon 64-bit\
+* I've only confirmed the linux build works on Linux Mint 22.3 - Cinnamon 64-bit
