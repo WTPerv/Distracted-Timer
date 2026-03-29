@@ -79,6 +79,7 @@ def SaveData():
     config["Window"]["scale"] = str(scale)
     config["Window"]["alpha"] = str(alphaPercent)
 
+    config["Save"]["currentDay"] = str(currentDay)
     config["Save"]["distractionSeconds"] = str(distractionSeconds)
     config["Save"]["focusedSeconds"] = str(focusedSeconds)
 
@@ -352,7 +353,7 @@ tray_resetTimer = QAction("Reset timer", triggered = ResetTimer)
 menu.addAction(tray_resetTimer)
 tray_resetPosition = QAction("Reset position", triggered = ResetPosition)
 menu.addAction(tray_resetPosition)
-tray_opacity = QMenu("Opcacity")
+tray_opacity = QMenu("Opacity")
 CreateTrayOpacity()
 menu.addMenu(tray_opacity)
 tray_scale = QMenu("Scale")
