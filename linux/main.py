@@ -27,6 +27,14 @@ class MyQWidget(QWidget):
         QApplication.instance().installEventFilter(self)
 
     def eventFilter(self, source, event):
+        if source is self:
+            if self.draggable:
+                if event.type() == QEvent.Enter:
+                    self.setCursor(Qt.SizeAllCursor)
+                
+                elif event.type() == QEvent.Leave:
+                    self.unsetCursor()
+
         if self.draggable:
             if (event.type() == QEvent.MouseButtonPress and 
                 event.button() == Qt.LeftButton):
@@ -218,7 +226,7 @@ def CreateTrayScale():
     tray_scaleGroup.triggered.connect(OnTrayScaleClick)
 
 def CreateTrayOpacity():
-    percents = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+    percents = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     
     tray_opacityGroup = QActionGroup(tray_opacity)
     for p in percents:
