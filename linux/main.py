@@ -23,6 +23,9 @@ class MyQWidget(QWidget):
         super(MyQWidget, self).__init__()
         self.clickDiff = None
         self.draggable = True
+        self.screenSize = QApplication.instance().primaryScreen().availableGeometry()
+
+        print(self.screenSize.width())
 
         QApplication.instance().installEventFilter(self)
 
@@ -42,7 +45,10 @@ class MyQWidget(QWidget):
                     return True
             
             elif event.type() == QEvent.MouseMove and self.clickDiff is not None:
-                self.move(QCursor.pos() + self.clickDiff)
+                new_pos = QCursor.pos() + self.clickDiff
+                new_pos.setX(max(0, min(new_pos.x(), self.screenSize.width() - baseSizeX*scale)))
+                new_pos.setY(max(0, min(new_pos.y(), self.screenSize.height() - baseSizeY*scale)))
+                self.move(new_pos)
                 return True
             
             elif event.type() == QEvent.MouseButtonRelease and self.clickDiff is not None:
@@ -121,7 +127,7 @@ def UpdateGUIOpacity():
 def UpdateGUIScale():
     global fs_distracted, fs_focused, fs_process    
 
-    root.resize(200*scale, 85*scale)
+    root.resize(baseSizeX*scale, baseSizeY*scale)
 
     dColor = "red" if isDistracted==1 else "grey"
     fColor = "white" if isDistracted==0 else "grey"
@@ -131,15 +137,15 @@ def UpdateGUIScale():
 
     distractedTimerText.setStyleSheet("color: " + dColor + "; font-size: " + fs_distracted)
     distractedTimerText.setAlignment(Qt.AlignCenter)
-    distractedTimerText.setGeometry(0, 0, 200*scale, 40*scale)
+    distractedTimerText.setGeometry(0, 0, baseSizeX*scale, 40*scale)
 
     focusedTimerText.setStyleSheet("color: " + fColor + "; font-size: " + fs_focused)
     focusedTimerText.setAlignment(Qt.AlignCenter)
-    focusedTimerText.setGeometry(0, 40*scale, 200*scale, 20*scale)
+    focusedTimerText.setGeometry(0, 40*scale, baseSizeX*scale, 20*scale)
 
     processText.setStyleSheet("color: white; font-size: " + fs_process)
     processText.setAlignment(Qt.AlignCenter)
-    processText.setGeometry(0, 60*scale, 200*scale, 25*scale)
+    processText.setGeometry(0, 60*scale, baseSizeX*scale, 25*scale)
 
 def CheckFocus(isFlash=False):
     global isDistracted, distractionSeconds, focusedSeconds, currentDay
@@ -205,7 +211,7 @@ def ResetPosition():
     SaveData()
 
 def CreateTrayScale():
-    scales = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4]
+    scales = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4, 5, 6, 7, 8]
 
     tray_scaleGroup = QActionGroup(tray_scale)
     for s in scales:
@@ -288,6 +294,9 @@ if not os.path.exists(whitelistFile):
     with open(whitelistFile, "w") as f:
         f.write("gnome-terminal\nnemo\n")
 
+baseSizeX = 160
+baseSizeY = 85
+
 posX = config.getint("Window","posX", fallback = 20)
 posY = config.getint("Window","posY", fallback = 20)
 dragMode = config.getboolean("Window", "dragMode", fallback = True)
@@ -319,7 +328,7 @@ UpdateGUIDraggable(True)
 root.setAttribute(Qt.WA_TranslucentBackground)
 root.setAttribute(Qt.WA_ShowWithoutActivating)
 root.setAttribute(Qt.WA_X11DoNotAcceptFocus)
-root.setGeometry(posX, posY, 200, 85)
+root.setGeometry(posX, posY, baseSizeX, baseSizeY)
 UpdateGUIOpacity()
 
 distractedTimerText = QLabel(SecondsToTime(distractionSeconds), root)
