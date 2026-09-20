@@ -11,6 +11,8 @@ NC='\033[0m' # No Color
 
 echo -e "${BLUE}Activating virtual environment...${NC}"
 source .venv/bin/activate
+echo "Activated venv: $VIRTUAL_ENV"
+echo ""
 
 echo -e "${YELLOW}Cleaning previous builds...${NC}"
 rm -rf build dist *.spec
