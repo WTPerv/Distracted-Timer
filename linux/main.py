@@ -11,7 +11,8 @@ import atexit
 from configparser import ConfigParser
 from PySide6.QtWidgets import QApplication, QLabel, QWidget, QSystemTrayIcon, QMenu
 from PySide6.QtGui import QIcon, QAction, QActionGroup, QCursor
-from PySide6.QtCore import Qt, QTimer, QEvent, QLockFile
+from PySide6.QtCore import Qt, QTimer, QEvent, QLockFile, QUrl
+from PySide6.QtMultimedia import QSoundEffect
 from ewmh import EWMH
 
 # -------------------------------------------------------------------------------------
@@ -24,8 +25,6 @@ class MyQWidget(QWidget):
         self.clickDiff = None
         self.draggable = True
         self.screenSize = QApplication.instance().primaryScreen().availableGeometry()
-
-        print(self.screenSize.width())
 
         QApplication.instance().installEventFilter(self)
 
@@ -180,6 +179,10 @@ def CheckFocus(isFlash=False):
     distractedTimerText.setText(SecondsToTime(distractionSeconds))
     focusedTimerText.setText(SecondsToTime(focusedSeconds))
     processText.setText(process)
+
+def SoundAlarm():
+    if isDistracted:
+        alarm.play()
 
 # ---------------- TRAY FUNCTIONS ----------------
 
@@ -346,6 +349,12 @@ subprocess.run([
     "-set", "_NET_WM_WINDOW_TYPE", "_NET_WM_WINDOW_TYPE_DOCK"
 ])
 
+# ---------------- ALARM ---------------
+
+alarm = QSoundEffect()
+alarm.setSource(QUrl("qrc:/buzz.wav"))
+alarm.setVolume(1.0)
+
 # ---------------- TRAY ----------------
 
 tray = QSystemTrayIcon(QIcon(":/clock.png"), app)
@@ -392,6 +401,10 @@ tray.setVisible(True)
 checkTimer = QTimer()
 checkTimer.timeout.connect(CheckFocus)
 checkTimer.start(1000)
+
+alarmTimer = QTimer()
+alarmTimer.timeout.connect(SoundAlarm)
+alarmTimer.start(1*60*1000)
 
 saveTimer = QTimer()
 saveTimer.timeout.connect(SaveData)

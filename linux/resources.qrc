@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>clock.png</file>
+        <file>buzz.wav</file>
     </qresource>
 </RCC>
