@@ -290,6 +290,7 @@ os.makedirs(configDir, exist_ok=True)
 config = ConfigParser()
 config["Window"] = {}
 config["Save"] = {}
+config["Extra"] = {}
 
 if not os.path.exists(configFile):
     with open(configFile, 'w') as f:
