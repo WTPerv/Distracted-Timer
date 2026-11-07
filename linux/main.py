@@ -96,6 +96,10 @@ def SaveData():
     config["Save"]["distractionSeconds"] = str(distractionSeconds)
     config["Save"]["focusedSeconds"] = str(focusedSeconds)
 
+    config["Extra"]["alarmEnabled"] = str(alarmEnabled)
+    config["Extra"]["alarmDelay"] = str(alarmDelay)
+    config["Extra"]["alarmVolume"] = str(alarmVolume)
+
     with open(configFile, 'w') as f:
         config.write(f)
 
@@ -181,7 +185,7 @@ def CheckFocus(isFlash=False):
     processText.setText(process)
 
 def SoundAlarm():
-    if isDistracted:
+    if isDistracted and alarmEnabled:
         alarm.play()
 
 # ---------------- TRAY FUNCTIONS ----------------
@@ -311,6 +315,10 @@ distractionSeconds = config.getint("Save","distractionSeconds", fallback = 0)
 focusedSeconds = config.getint("Save","focusedSeconds", fallback = 0)
 currentDay = config.getint("Save","currentDay", fallback = datetime.now().timetuple().tm_yday)
 
+alarmEnabled = config.getboolean("Extra", "alarmEnabled", fallback = True)
+alarmDelay = config.getfloat("Extra", "alarmDelay", fallback = 2.0)
+alarmVolume = config.getfloat("Extra", "alarmVolume", fallback = 1.0)
+
 whitelist = LoadWhitelist()
 
 # ---------------- INIT ----------------
@@ -353,7 +361,7 @@ subprocess.run([
 
 alarm = QSoundEffect()
 alarm.setSource(QUrl("qrc:/buzz.wav"))
-alarm.setVolume(1.0)
+alarm.setVolume(alarmVolume)
 
 # ---------------- TRAY ----------------
 
@@ -404,7 +412,7 @@ checkTimer.start(1000)
 
 alarmTimer = QTimer()
 alarmTimer.timeout.connect(SoundAlarm)
-alarmTimer.start(1*60*1000)
+alarmTimer.start(alarmDelay*60*1000)
 
 saveTimer = QTimer()
 saveTimer.timeout.connect(SaveData)
