@@ -186,10 +186,12 @@ def CheckFocus(isFlash=False):
 
 def SoundAlarm():
     if isDistracted and alarmEnabled:
-        self.alarm = QSoundEffect()
-        self.alarm.setSource(QUrl("qrc:/buzz.wav"))
-        self.alarm.setVolume(alarmVolume)
-        self.alarm.play()
+        alarm = QSoundEffect()
+        alarm.setVolume(alarmVolume)
+        alarm.statusChanged.connect(
+            lambda: alarm.play() if alarm.status() == QSoundEffect.Status.Ready else None
+        )
+        alarm.setSource(QUrl("qrc:/buzz.wav"))
 
 # ---------------- TRAY FUNCTIONS ----------------
 
